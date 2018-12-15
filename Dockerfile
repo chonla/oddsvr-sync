@@ -15,6 +15,6 @@ ENV ODDSVR_DB=${ODDSVR_DB}
 RUN apk add --no-cache git \
     && go get ./... \
     && go build \
-    && echo */15 * * * * /go/src/github.com/chonla/oddsvr-sync/oddsvr-sync > /etc/crontabs/root
+    && cat ./cron >> /etc/crontabs/root
 
 RUN /go/src/github.com/chonla/oddsvr-sync/oddsvr-sync
