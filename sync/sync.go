@@ -38,14 +38,16 @@ func SyncActivities(strava *strava.Strava, db *database.Database) {
 			logger.Error(fmt.Sprintf("Unable to get athlete activities: %v", e))
 		}
 
-		var data []interface{}
-		for _, a := range activities {
-			data = append(data, a)
+		if len(activities) > 0 {
+			var data []interface{}
+			for _, a := range activities {
+				data = append(data, a)
+			}
+
+			db.InsertBulk("activities", data)
+
+			vr.StampLastSync(athlete.ID, syncedOn)
 		}
-
-		db.InsertBulk("activities", data)
-
-		vr.StampLastSync(athlete.ID, syncedOn)
 	}
 }
 

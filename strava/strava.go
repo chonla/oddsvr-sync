@@ -59,7 +59,16 @@ func (s *Strava) GetActivities(token string, since int64) ([]run.Activity, int64
 			page++
 		}
 
-		logger.Debug(fmt.Sprintf("New %d activity record(s) collected.", len(activities)))
+		activitiesCount := len(activities)
+		switch activitiesCount {
+		case 0:
+			logger.Debug("No more activity collected.")
+		case 1:
+			logger.Debug("One new activity collected.")
+		default:
+			logger.Debug(fmt.Sprintf("%d new activities collected.", activitiesCount))
+		}
+
 	}
 
 	for _, a := range buffer {
@@ -68,7 +77,21 @@ func (s *Strava) GetActivities(token string, since int64) ([]run.Activity, int64
 		}
 	}
 
-	logger.Debug(fmt.Sprintf("New %d running record(s) extracted.", len(result)))
+	resultCount := len(result)
+	switch resultCount {
+	case 0:
+		logger.Debug("No running activity collected.")
+	case 1:
+		logger.Debug("One new running activity collected.")
+	default:
+		logger.Debug(fmt.Sprintf("%d new running activities collected.", resultCount))
+	}
 
-	return result, now.Unix(), nil
+	var recentStamp int64
+	if resultCount > 0 {
+		recent, _ := time.Parse(time.RFC3339, result[0].StartDate)
+		recentStamp = recent.Unix()
+	}
+
+	return result, recentStamp, nil
 }
