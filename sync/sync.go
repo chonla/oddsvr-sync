@@ -2,6 +2,7 @@ package sync
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/chonla/oddsvr-sync/database"
 	"github.com/chonla/oddsvr-sync/logger"
@@ -9,7 +10,7 @@ import (
 	"github.com/chonla/oddsvr-sync/strava"
 )
 
-func Sync(strava *strava.Strava, db *database.Database) {
+func SyncActivities(strava *strava.Strava, db *database.Database) {
 	logger.Info("Syncing data from Strava to Database")
 
 	vr := run.NewVirtualRun(db)
@@ -22,6 +23,15 @@ func Sync(strava *strava.Strava, db *database.Database) {
 		lastSync := vr.GetLastSync(athlete.ID)
 
 		logger.Debug(fmt.Sprintf("Last synchroized: %d", lastSync))
+
+		now := time.Now().Unix()
+		if athlete.Expiry <= now {
+			logger.Info("Token has been expired. Refresh.")
+			e := refreshToken(athlete, strava, vr)
+			if e != nil {
+				logger.Error("Unable to refresh token")
+			}
+		}
 
 		activities, syncedOn, e := strava.GetActivities(athlete.AccessToken, lastSync) // lastSync)
 		if e != nil {
@@ -37,4 +47,17 @@ func Sync(strava *strava.Strava, db *database.Database) {
 
 		vr.StampLastSync(athlete.ID, syncedOn)
 	}
+}
+
+func refreshToken(athlete run.AthleteCredential, strava *strava.Strava, vr *run.VirtualRun) error {
+	newToken, e := strava.RefreshToken(athlete.RefreshToken)
+	if e != nil {
+		return e
+	}
+
+	athlete.AccessToken = newToken.AccessToken
+	athlete.RefreshToken = newToken.RefreshToken
+	athlete.Expiry = newToken.Expiry
+
+	return vr.UpdateToken(athlete)
 }

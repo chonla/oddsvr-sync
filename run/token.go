@@ -7,7 +7,7 @@ type InvertedToken struct {
 
 type Token struct {
 	TokenType    string `json:"token_type"`
-	Expiry       uint32 `json:"expires_at"`
+	Expiry       int64  `json:"expires_at"`
 	RefreshToken string `json:"refresh_token"`
 	AccessToken  string `json:"access_token"`
 	Athlete      `json:"athlete"`

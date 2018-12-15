@@ -22,8 +22,10 @@ func (v *VirtualRun) AllAthleteCredentials() []AthleteCredential {
 	if e == nil {
 		for _, t := range tokens {
 			creds = append(creds, AthleteCredential{
-				ID:          t.ID,
-				AccessToken: t.AccessToken,
+				ID:           t.ID,
+				AccessToken:  t.AccessToken,
+				RefreshToken: t.RefreshToken,
+				Expiry:       t.Expiry,
 			})
 		}
 	}
@@ -48,4 +50,23 @@ func (v *VirtualRun) GetLastSync(id uint32) int64 {
 		return 0
 	}
 	return output["stamp"].(int64)
+}
+
+func (v *VirtualRun) UpdateToken(token AthleteCredential) error {
+	invToken := InvertedToken{}
+	e := v.db.Get("athlete", bson.M{
+		"_id": token.ID,
+	}, &invToken)
+
+	if e != nil {
+		return e
+	}
+
+	invToken.Token.Expiry = token.Expiry
+	invToken.Token.AccessToken = token.AccessToken
+	invToken.Token.RefreshToken = token.RefreshToken
+
+	return v.db.Replace("athlete", bson.M{
+		"_id": token.ID,
+	}, invToken)
 }

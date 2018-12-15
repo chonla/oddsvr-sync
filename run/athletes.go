@@ -1,8 +1,10 @@
 package run
 
 type AthleteCredential struct {
-	ID          uint32
-	AccessToken string
+	ID           uint32
+	AccessToken  string
+	RefreshToken string
+	Expiry       int64
 }
 
 type Athlete struct {

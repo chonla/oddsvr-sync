@@ -24,6 +24,18 @@ func NewStrava(clientID, clientSecret string) *Strava {
 	}
 }
 
+func (s *Strava) RefreshToken(token string) (*run.Token, error) {
+	newToken := &run.Token{}
+	client := httpclient.NewClient()
+	data := fmt.Sprintf("client_id=%s&client_secret=%s&grant_type=refresh_token&refresh_token=%s", s.clientID, s.clientSecret, token)
+	e := client.PostForm(fmt.Sprintf("%s/oauth/token", APIBASE), data, newToken)
+	if e != nil {
+		return nil, e
+	}
+
+	return newToken, nil
+}
+
 func (s *Strava) GetActivities(token string, since int64) ([]run.Activity, int64, error) {
 	page := 1
 	perPage := 100

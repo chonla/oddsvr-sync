@@ -41,3 +41,8 @@ func (db *Database) Upsert(collection string, filter, data interface{}) error {
 	_, e := db.db.C(collection).Upsert(filter, data)
 	return e
 }
+
+func (db *Database) Replace(collection string, filter, data interface{}) error {
+	e := db.db.C(collection).Update(filter, data)
+	return e
+}

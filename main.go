@@ -30,7 +30,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	sync.Sync(st, db)
+	sync.SyncActivities(st, db)
 }
 
 func env(key, defaultValue, name string, errorIfMissing bool) (string, error) {
