@@ -18,3 +18,5 @@ RUN apk add --no-cache git \
     && cat ./cron >> /etc/crontabs/root
 
 RUN /go/src/github.com/chonla/oddsvr-sync/oddsvr-sync
+
+CMD ["crond", "-f", "-d", "8"]
