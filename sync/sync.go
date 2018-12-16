@@ -27,9 +27,10 @@ func SyncActivities(strava *strava.Strava, db *database.Database) {
 		now := time.Now().Unix()
 		if athlete.Expiry <= now {
 			logger.Info("Token has been expired. Refresh.")
-			e := refreshToken(athlete, strava, vr)
+			athlete, e := refreshToken(athlete, strava, vr)
 			if e != nil {
-				logger.Error("Unable to refresh token")
+				logger.Error("Unable to refresh token, skipped")
+				continue
 			}
 		}
 
@@ -51,7 +52,7 @@ func SyncActivities(strava *strava.Strava, db *database.Database) {
 	}
 }
 
-func refreshToken(athlete run.AthleteCredential, strava *strava.Strava, vr *run.VirtualRun) error {
+func refreshToken(athlete run.AthleteCredential, strava *strava.Strava, vr *run.VirtualRun) (run.AthleteCredential, error) {
 	newToken, e := strava.RefreshToken(athlete.RefreshToken)
 	if e != nil {
 		return e
@@ -61,5 +62,5 @@ func refreshToken(athlete run.AthleteCredential, strava *strava.Strava, vr *run.
 	athlete.RefreshToken = newToken.RefreshToken
 	athlete.Expiry = newToken.Expiry
 
-	return vr.UpdateToken(athlete)
+	return athlete, vr.UpdateToken(athlete)
 }
