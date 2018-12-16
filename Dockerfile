@@ -1,4 +1,4 @@
-FROM golang:1.11.4-alpine
+FROM golang:1.11.3-alpine
 
 WORKDIR /go/src/github.com/chonla/oddsvr-sync
 
