@@ -1,1 +1,2 @@
-*/15 * * * * /go/src/github.com/chonla/oddsvr-sync/oddsvr-sync
+*/30 * * * * /go/src/github.com/chonla/oddsvr-sync/oddsvr-sync
+* */1 * * * ntpd -d -q -n -p asia.pool.ntp.org
