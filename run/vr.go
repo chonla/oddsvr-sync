@@ -9,10 +9,30 @@ type VirtualRun struct {
 	db *database.Database
 }
 
+type Vr struct {
+	ID              bson.ObjectId `json:"_id,omitempty" bson:"_id,omitempty"`
+	CreatedBy       uint32        `json:"created_by" bson:"created_by"`
+	CreatedDateTime string        `json:"created_datetime" bson:"created_datetime"`
+	Title           string        `json:"title" bson:"title"`
+	Detail          string        `json:"detail" bson:"detail"`
+	Period          []string      `json:"period" bson:"period"`
+	Link            string        `json:"link" bson:"link"`
+	Engagements     []Engagement  `json:"engagements" bson:"engagements"`
+}
+
+type Engagement struct {
+	AthleteID uint32  `json:"athlete_id" bson:"athlete_id"`
+	Distance  float64 `json:"distance" bson:"distance"`
+}
+
 func NewVirtualRun(db *database.Database) *VirtualRun {
 	return &VirtualRun{
 		db: db,
 	}
+}
+
+func (v *VirtualRun) GetInProgressRun() []Vr {
+	return []Vr{}
 }
 
 func (v *VirtualRun) AllAthleteCredentials() []AthleteCredential {

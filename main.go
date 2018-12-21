@@ -31,6 +31,7 @@ func main() {
 	}
 
 	sync.SyncActivities(st, db)
+	sync.SyncVirtualRuns(db)
 }
 
 func env(key, defaultValue, name string, errorIfMissing bool) (string, error) {

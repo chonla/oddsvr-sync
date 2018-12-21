@@ -10,8 +10,20 @@ import (
 	"github.com/chonla/oddsvr-sync/strava"
 )
 
+func SyncVirtualRuns(db *database.Database) {
+	logger.Info("Updating athletes data in virtual runs")
+
+	// vr := run.NewVirtualRun(db)
+
+	// runs := vr.GetInProgressRun()
+
+	// for _, progRun := range runs {
+
+	// }
+}
+
 func SyncActivities(strava *strava.Strava, db *database.Database) {
-	logger.Info("Syncing data from Strava to Database")
+	logger.Info("Syncing data from Strava to database")
 
 	vr := run.NewVirtualRun(db)
 
