@@ -27,6 +27,4 @@ COPY --from=builder /go/src/github.com/chonla/oddsvr-sync/cron .
 
 RUN cat /app/cron >> /etc/crontabs/root
 
-RUN /app/oddsvr-sync
-
 CMD ["crond", "-f", "-d", "8"]
