@@ -1,4 +1,4 @@
-FROM golang:1.11.3-alpine AS builder
+FROM golang:1.11.4-alpine AS builder
 
 WORKDIR /go/src/github.com/chonla/oddsvr-sync
 
@@ -6,8 +6,7 @@ COPY . .
 
 RUN apk add --no-cache git \
     && go get ./... \
-    && GOOS=linux GOARCH=amd64 go build -o oddsvr-sync \
-    && ls -al
+    && GOOS=linux GOARCH=amd64 go build -o oddsvr-sync
 
 
 
