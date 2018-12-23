@@ -1,6 +1,7 @@
 package httpclient
 
 import (
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -23,7 +24,11 @@ func NewClientWithToken(token string) *Client {
 }
 
 func (c *Client) Get(url string, output interface{}) error {
-	httpClient := &http.Client{}
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+
+	httpClient := &http.Client{Transport: tr}
 	req, e := http.NewRequest("GET", url, nil)
 	if e != nil {
 		return e
@@ -50,7 +55,11 @@ func (c *Client) Get(url string, output interface{}) error {
 }
 
 func (c *Client) PostForm(url, data string, output interface{}) error {
-	httpClient := &http.Client{}
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+
+	httpClient := &http.Client{Transport: tr}
 	req, e := http.NewRequest("POST", url, strings.NewReader(data))
 	if e != nil {
 		return e
