@@ -13,13 +13,42 @@ import (
 func SyncVirtualRuns(db *database.Database) {
 	logger.Info("Updating athletes data in virtual runs")
 
-	// vr := run.NewVirtualRun(db)
+	vr := run.NewVirtualRun(db)
 
-	// runs := vr.GetInProgressRun()
+	runs, e := vr.GetInProgressRun()
+	if e != nil {
+		logger.Error("Unable to retrieve runs in progress")
+		return
+	}
 
-	// for _, progRun := range runs {
+	for _, progress := range runs {
+		logger.Debug(fmt.Sprintf("Virtual Run: %s", progress.Link))
 
-	// }
+		for _, engagement := range progress.Engagements {
+
+			logger.Debug(fmt.Sprintf("Athelete: %d", engagement.AthleteID))
+
+			activities, e := vr.AthleteActivities(engagement.AthleteID, progress.Period)
+			if e != nil {
+				logger.Error("Unable to retrieve activities. Skip.")
+				continue
+			}
+
+			engagement.TakenDistance = 0
+			for _, activity := range activities {
+				engagement.TakenDistance += activity.Distance
+			}
+
+			e = vr.UpdateEngagementTakenDistance(progress.Link, engagement.AthleteID, engagement.TakenDistance)
+
+			logger.Debug(fmt.Sprintf("Update athlete %d taken distance to %0.2f", engagement.AthleteID, engagement.TakenDistance))
+
+			if e != nil {
+				logger.Error("Unable to update taken distance. Skip.")
+				continue
+			}
+		}
+	}
 }
 
 func SyncActivities(strava *strava.Strava, db *database.Database) {

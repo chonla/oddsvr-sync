@@ -6,11 +6,14 @@ COPY . .
 
 RUN apk add --no-cache git \
     && go get ./... \
-    && GOOS=linux GOARCH=amd64 go build -o oddsvr-sync
+    && GOOS=linux GOARCH=amd64 go build -o oddsvr-sync \
+    && ls -al
 
 
 
 FROM alpine:latest
+
+WORKDIR /app
 
 ARG ODDSVR_STRAVA_CLIENT_ID
 ARG ODDSVR_STRAVA_CLIENT_SECRET
@@ -21,10 +24,10 @@ ENV ODDSVR_STRAVA_CLIENT_SECRET=${ODDSVR_STRAVA_CLIENT_SECRET}
 ENV ODDSVR_DB=${ODDSVR_DB}
 
 COPY --from=builder /go/src/github.com/chonla/oddsvr-sync/oddsvr-sync .
-COPY --from=builder ./cron .
+COPY --from=builder /go/src/github.com/chonla/oddsvr-sync/cron .
 
-RUN cat ./cron >> /etc/crontabs/root
+RUN cat /app/cron >> /etc/crontabs/root
 
-RUN ./oddsvr-sync
+RUN /app/oddsvr-sync
 
 CMD ["crond", "-f", "-d", "8"]

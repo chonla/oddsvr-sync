@@ -1,6 +1,8 @@
 package run
 
 import (
+	"time"
+
 	"github.com/chonla/oddsvr-sync/database"
 	"github.com/globalsign/mgo/bson"
 )
@@ -21,8 +23,9 @@ type Vr struct {
 }
 
 type Engagement struct {
-	AthleteID uint32  `json:"athlete_id" bson:"athlete_id"`
-	Distance  float64 `json:"distance" bson:"distance"`
+	AthleteID     uint32  `json:"athlete_id" bson:"athlete_id"`
+	Distance      float64 `json:"distance" bson:"distance"`
+	TakenDistance float64 `json:"taken_distance" bson:"taken_distance"`
 }
 
 func NewVirtualRun(db *database.Database) *VirtualRun {
@@ -31,14 +34,26 @@ func NewVirtualRun(db *database.Database) *VirtualRun {
 	}
 }
 
-func (v *VirtualRun) GetInProgressRun() []Vr {
-	return []Vr{}
+func (v *VirtualRun) GetInProgressRun() ([]Vr, error) {
+	vrs := []Vr{}
+	now := time.Now().UTC()
+	nowStamp := now.Format(time.RFC3339)
+	e := v.db.List("virtualrun", bson.M{
+		"period.0": bson.M{
+			"$lte": nowStamp,
+		},
+		"period.1": bson.M{
+			"$gte": nowStamp,
+		},
+	}, []string{"-startdate"}, &vrs)
+
+	return vrs, e
 }
 
 func (v *VirtualRun) AllAthleteCredentials() []AthleteCredential {
 	creds := []AthleteCredential{}
 	tokens := []InvertedToken{}
-	e := v.db.List("athlete", bson.M{}, &tokens)
+	e := v.db.List("athlete", bson.M{}, []string{}, &tokens)
 	if e == nil {
 		for _, t := range tokens {
 			creds = append(creds, AthleteCredential{
@@ -89,4 +104,17 @@ func (v *VirtualRun) UpdateToken(token AthleteCredential) error {
 	return v.db.Replace("athlete", bson.M{
 		"_id": token.ID,
 	}, invToken)
+}
+
+func (v *VirtualRun) UpdateEngagementTakenDistance(id string, athlete_id uint32, taken_distance float64) error {
+	e := v.db.Update("virtualrun",
+		bson.M{
+			"link":                   id,
+			"engagements.athlete_id": athlete_id,
+		},
+		bson.M{
+			"engagements.$.taken_distance": taken_distance,
+		},
+	)
+	return e
 }
