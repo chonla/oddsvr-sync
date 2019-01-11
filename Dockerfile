@@ -4,8 +4,9 @@ WORKDIR /go/src/github.com/chonla/oddsvr-sync
 
 COPY . .
 
-RUN apk add --no-cache git \
+RUN apk add --no-cache git musl-dev gcc \
     && go get ./... \
+    && go test ./... \
     && GOOS=linux GOARCH=amd64 go build -o oddsvr-sync
 
 
